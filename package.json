@@ -1,0 +1,29 @@
+{
+  "name": "m51-build-tools",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node --esm ./src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M-51/build-tools.git"
+  },
+  "type": "module",
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/M-51/build-tools/issues"
+  },
+  "homepage": "https://github.com/M-51/build-tools#readme",
+  "dependencies": {
+    "chokidar": "^3.5.3"
+  },
+  "devDependencies": {
+    "eslint-config-m51": "^0.1.10",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  }
+}

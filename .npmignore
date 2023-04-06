@@ -1,0 +1,13 @@
+### dirs ###
+node_modules
+src
+test
+scripts
+.vscode
+.github
+
+### files ###
+.eslintrc
+.gitignore
+tsconfig.json
+playwright.config.ts
