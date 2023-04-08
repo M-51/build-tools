@@ -1,11 +1,54 @@
 import chokidar from 'chokidar';
-import { parseArgs } from 'node:util';
+import http from 'http';
 
 import debounce from './utils/debounce.js';
 import log from './utils/logger.js';
 
-async function dev() {
-    const closeServer = config.server();
+import type { Callback } from './utils/debounce.js';
+
+const refresh: Callback = (added, changed, types) => {
+    console.log(added);
+    console.log(changed);
+    console.log(types);
+};
+
+const debouncedRefresh = debounce(refresh);
+
+interface Config {
+    watchers: {
+        [key: string]: {
+            compile: () => Promise<unknown>,
+            glob: string | Array<string>,
+        }
+    }
+    server?: {
+        listener: http.RequestListener,
+        port?: number,
+    }
+}
+
+async function main(config: Config) {
+    /*
+    const params = parseArgs({
+        options: {
+            browsers: { type: 'string', short: 'b', multiple: true },
+        },
+        strict: true,
+    });
+    */
+
+    const closeServer = (() => {
+        if (config.server) {
+            const server = http.createServer(config.server.listener).listen(config.server.port || 8080);
+            return () => new Promise((resolve, reject) => {
+                server.close((err) => {
+                    if (err) return reject(err);
+                    return resolve(true);
+                });
+            });
+        }
+        return undefined;
+    })();
 
     const watchers = Object.entries(config.watchers).map(([name, value]) => {
         const watcher = chokidar.watch(value.glob)
@@ -21,14 +64,4 @@ async function dev() {
     process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise()))));
 }
 
-function main() {
-    const params = parseArgs({
-        options: {
-            browsers: { type: 'string', short: 'b', multiple: true },
-        },
-        strict: true,
-    });
-
-    dev();
-}
-main();
+export default main;

@@ -2,6 +2,8 @@ type Types = Set<string>;
 type Added = Array<string>;
 type Changed = Array<string>;
 
+type Callback = (added?: string, changed?: string, types?: Types) => unknown;
+
 function formatListOfFilesMessage(arr: Added | Changed) {
     const message = `${arr.slice(0, 3).map((p) => {
         const chunks = p.split('/');
@@ -14,7 +16,7 @@ function formatListOfFilesMessage(arr: Added | Changed) {
     return message;
 }
 
-function debounce(callback: (added?: string, changed?: string, types?: Types) => unknown, time = 50) {
+function debounce(callback: Callback, time = 50) {
     let interval: NodeJS.Timeout;
     const added: Added = [];
     const changed: Changed = [];
@@ -34,3 +36,4 @@ function debounce(callback: (added?: string, changed?: string, types?: Types) =>
 }
 
 export default debounce;
+export { Callback };
