@@ -13,32 +13,40 @@ const rootDir = path.join(new URL(import.meta.url).pathname, '../../');
 const paths = {
     htmlFile: path.join(rootDir, './scripts/content/index.html'),
     cssFile: path.join(rootDir, './scripts/content/style.css'),
-    tsFile: path.join(rootDir, './scripts/content/script.ts'),
+    tsFile: path.join(rootDir, './scripts/content/scripts.ts'),
 };
 
 const cache: Map<string, string> = new Map();
 
+function sleepRandom() {
+    return new Promise((resolve) => {
+        setTimeout(resolve, Math.round(Math.random() * 3000));
+    });
+}
+
 main({
     watchers: {
-        css: {
+        CSS: {
             compile: async () => {
                 const input = await readFile(paths.cssFile, 'utf-8');
                 const { css } = await postcss([atImport(), postcssPresetEnv({ stage: 1 })])
                     .process(input, { from: paths.cssFile, map: { inline: true } });
                 cache.set('css', css);
+                await sleepRandom();
                 return css;
             },
             glob: path.join(rootDir, './scripts/content/style.css'),
         },
-        html: {
+        HTML: {
             compile: async () => {
                 const html = await readFile(paths.htmlFile, { encoding: 'utf-8' });
                 cache.set('html', html);
+                await sleepRandom();
                 return html;
             },
             glob: path.join(rootDir, './scripts/content/index.html'),
         },
-        ts: {
+        Typescript: {
             compile: async () => {
                 const build = await esbuild.build({
                     entryPoints: [paths.tsFile],
@@ -51,9 +59,10 @@ main({
                 });
                 const js = build.outputFiles[0].text;
                 cache.set('js', js);
+                await sleepRandom();
                 return js;
             },
-            glob: path.join(rootDir, './scripts/content/script.ts'),
+            glob: path.join(rootDir, './scripts/content/scripts.ts'),
         },
     },
     server: {

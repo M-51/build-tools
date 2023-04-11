@@ -1,4 +1,4 @@
-type Types = Set<string>;
+type Types = Array<string>;
 type Added = Array<string>;
 type Changed = Array<string>;
 
@@ -20,9 +20,9 @@ function debounce(callback: Callback, time = 50) {
     let interval: NodeJS.Timeout;
     const added: Added = [];
     const changed: Changed = [];
-    const types: Types = new Set();
+    const types: Types = [];
     return (event: 'added' | 'changed', filePath: string, type: string) => {
-        if (type) types.add(type);
+        if (type) types.push(type);
         clearTimeout(interval);
         if (event === 'added') added.push(filePath);
         if (event === 'changed') changed.push(filePath);
@@ -30,10 +30,10 @@ function debounce(callback: Callback, time = 50) {
             callback(formatListOfFilesMessage(added), formatListOfFilesMessage(changed), types);
             added.length = 0;
             changed.length = 0;
-            types.clear();
+            types.length = 0;
         }, time);
     };
 }
 
 export default debounce;
-export { Callback };
+export { Callback, Added, Changed };

@@ -5,14 +5,10 @@ import debounce from './utils/debounce.js';
 import log from './utils/logger.js';
 
 import type { Callback } from './utils/debounce.js';
+import progressBar from './utils/progressbar.js';
+import placeholder from './utils/placeholder.js';
+import formatFileList from './utils/format-file-list.js';
 
-const refresh: Callback = (added, changed, types) => {
-    console.log(added);
-    console.log(changed);
-    console.log(types);
-};
-
-const debouncedRefresh = debounce(refresh);
 
 interface Config {
     watchers: {
@@ -26,6 +22,24 @@ interface Config {
         port?: number,
     }
 }
+/*
+function formatLogLine(status: { [key: string]: 'compiling' | 'compiled' | 'error' }) {
+    return Object.entries(status).map(([type, value]) => `${type} ${value}`).join(' | ');
+}
+*/
+
+function formatLogLine(added: Parameters<Callback>[0], changed: Parameters<Callback>[1], usedTypes: Parameters<Callback>[2]) {
+    const status = Object.fromEntries(usedTypes.map((key) => [key, 'compiling']));
+    const formatedFileList = formatFileList(added, changed);
+    const logger = log(`${formatedFileList} | `);
+    return (updates: typeof status) => {
+        
+        logger(`${formatedFileList} | ${formatLogLine(status)}`);
+    }
+    // return Object.entries(status).map(([type, value]) => `${type} ${value}`).join(' | ');
+
+
+}
 
 async function main(config: Config) {
     /*
@@ -36,6 +50,37 @@ async function main(config: Config) {
         strict: true,
     });
     */
+    const { addPlaceholder, deletePlaceholder } = placeholder('Waiting for change...');
+
+    const refresh: Callback = async (added, changed, types) => {
+        deletePlaceholder();
+
+        const usedTypes = Object.keys(config.watchers).filter((type) => types.includes(type));
+        // const status: Parameters<typeof formatLogLine>[0] = Object.fromEntries(usedTypes.map((key) => [key, 'compiling']));
+
+        
+        try {
+            await Promise.all(usedTypes.map((type) => (async () => {
+                try {
+                    await config.watchers[type].compile();
+                    status[type] = 'compiled';
+                    
+                } catch (error) {
+                    status[type] = 'error';
+                    throw error;
+                }
+            })()));
+        } catch (error) {
+            logger(`${formatedFileList} | ${formatLogLine(status)}`);
+            console.error(error);
+            addPlaceholder();
+            return;
+        }
+        logger(`${formatedFileList} | ${formatLogLine(status)}`);
+        addPlaceholder();
+    };
+
+    const debouncedRefresh = debounce(refresh);
 
     const closeServer = (() => {
         if (config.server) {
