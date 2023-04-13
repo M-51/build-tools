@@ -5,10 +5,10 @@ import debounce from './utils/debounce.js';
 import log from './utils/logger.js';
 
 import type { Callback } from './utils/debounce.js';
-import progressBar from './utils/progressbar.js';
+// import progressBar from './utils/progressbar.js';
 import placeholder from './utils/placeholder.js';
-import formatFileList from './utils/format-file-list.js';
-
+import formatLogLine from './utils/format-log-line.js';
+import type { Status } from './utils/format-log-line.js';
 
 interface Config {
     watchers: {
@@ -21,24 +21,6 @@ interface Config {
         listener: http.RequestListener,
         port?: number,
     }
-}
-/*
-function formatLogLine(status: { [key: string]: 'compiling' | 'compiled' | 'error' }) {
-    return Object.entries(status).map(([type, value]) => `${type} ${value}`).join(' | ');
-}
-*/
-
-function formatLogLine(added: Parameters<Callback>[0], changed: Parameters<Callback>[1], usedTypes: Parameters<Callback>[2]) {
-    const status = Object.fromEntries(usedTypes.map((key) => [key, 'compiling']));
-    const formatedFileList = formatFileList(added, changed);
-    const logger = log(`${formatedFileList} | `);
-    return (updates: typeof status) => {
-        
-        logger(`${formatedFileList} | ${formatLogLine(status)}`);
-    }
-    // return Object.entries(status).map(([type, value]) => `${type} ${value}`).join(' | ');
-
-
 }
 
 async function main(config: Config) {
@@ -54,29 +36,30 @@ async function main(config: Config) {
 
     const refresh: Callback = async (added, changed, types) => {
         deletePlaceholder();
-
+        const now = Date.now();
         const usedTypes = Object.keys(config.watchers).filter((type) => types.includes(type));
-        // const status: Parameters<typeof formatLogLine>[0] = Object.fromEntries(usedTypes.map((key) => [key, 'compiling']));
+        const status: Status = new Map(usedTypes.map((type) => [type, { status: 'compiling', startTime: now }]));
+        const updateLogLine = formatLogLine(added, changed, status);
 
-        
         try {
             await Promise.all(usedTypes.map((type) => (async () => {
+                const obj = status.get(type);
                 try {
                     await config.watchers[type].compile();
-                    status[type] = 'compiled';
-                    
+                    obj.status = 'compiled';
+                    obj.finishTime = Date.now();
+                    updateLogLine(status);
                 } catch (error) {
-                    status[type] = 'error';
+                    obj.status = 'error';
+                    updateLogLine(status);
                     throw error;
                 }
             })()));
         } catch (error) {
-            logger(`${formatedFileList} | ${formatLogLine(status)}`);
             console.error(error);
             addPlaceholder();
             return;
         }
-        logger(`${formatedFileList} | ${formatLogLine(status)}`);
         addPlaceholder();
     };
 
