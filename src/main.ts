@@ -1,6 +1,6 @@
 import chokidar from 'chokidar';
 import http from 'http';
-
+import { parseArgs } from 'node:util';
 import debounce from './utils/debounce.js';
 import log from './utils/logger.js';
 
@@ -24,14 +24,13 @@ interface Config {
 }
 
 async function main(config: Config) {
-    /*
     const params = parseArgs({
         options: {
             browsers: { type: 'string', short: 'b', multiple: true },
+            server: { type: 'boolean', short: 's' },
         },
         strict: true,
     });
-    */
     const { addPlaceholder, deletePlaceholder } = placeholder('Waiting for change...');
 
     const refresh: Callback = async (added, changed, types) => {
@@ -64,9 +63,8 @@ async function main(config: Config) {
     };
 
     const debouncedRefresh = debounce(refresh);
-
     const closeServer = (() => {
-        if (config.server) {
+        if (params.values.server && config.server?.listener) {
             const server = http.createServer(config.server.listener).listen(config.server.port || 8080);
             return () => new Promise((resolve, reject) => {
                 server.close((err) => {
