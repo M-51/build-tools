@@ -5,7 +5,7 @@ import debounce from './utils/debounce.js';
 import log from './utils/logger.js';
 
 import type { Callback } from './utils/debounce.js';
-// import progressBar from './utils/progressbar.js';
+import progressBar from './utils/progressbar.js';
 import placeholder from './utils/placeholder.js';
 import formatLogLine from './utils/format-log-line.js';
 import type { Status } from './utils/format-log-line.js';
@@ -63,9 +63,12 @@ async function main(config: Config) {
     };
 
     const debouncedRefresh = debounce(refresh);
-    const closeServer = (() => {
+    const closeServer = await (async () => {
         if (params.values.server && config.server?.listener) {
-            const server = http.createServer(config.server.listener).listen(config.server.port || 8080);
+            const barUpdate = progressBar(1);
+            const logger = log(`${barUpdate(0)} Starting server...`);
+            const port = config.server.port || 8080;
+            const server = http.createServer(config.server.listener).listen(port, () => logger(`${barUpdate(1)} Server started in {time}ms. Listening on \x1b[35mhttp://localhost:${port}\x1b[0m`));
             return () => new Promise((resolve, reject) => {
                 server.close((err) => {
                     if (err) return reject(err);
