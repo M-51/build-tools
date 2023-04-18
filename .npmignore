@@ -10,4 +10,5 @@ scripts
 .eslintrc
 .gitignore
 tsconfig.json
+tsconfig.production.json
 playwright.config.ts

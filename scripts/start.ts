@@ -17,13 +17,7 @@ const paths = {
 };
 
 const cache: Map<string, string> = new Map();
-/*
-function sleepRandom() {
-    return new Promise((resolve) => {
-        setTimeout(resolve, Math.round(Math.random() * 3000));
-    });
-}
-*/
+
 main({
     watchers: {
         CSS: {
@@ -32,7 +26,6 @@ main({
                 const { css } = await postcss([atImport(), postcssPresetEnv({ stage: 1 })])
                     .process(input, { from: paths.cssFile, map: { inline: true } });
                 cache.set('css', css);
-                // await sleepRandom();
                 return css;
             },
             glob: path.join(rootDir, './scripts/content/style.css'),
@@ -41,7 +34,6 @@ main({
             compile: async () => {
                 const html = await readFile(paths.htmlFile, { encoding: 'utf-8' });
                 cache.set('html', html);
-                // await sleepRandom();
                 return html;
             },
             glob: path.join(rootDir, './scripts/content/index.html'),
@@ -59,7 +51,6 @@ main({
                 });
                 const js = build.outputFiles[0].text;
                 cache.set('js', js);
-                // await sleepRandom();
                 return js;
             },
             glob: [path.join(rootDir, './scripts/content/scripts.ts'), path.join(rootDir, './src/**/*.ts')],
