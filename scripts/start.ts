@@ -62,7 +62,7 @@ main({
                 // await sleepRandom();
                 return js;
             },
-            glob: path.join(rootDir, './scripts/content/scripts.ts'),
+            glob: [path.join(rootDir, './scripts/content/scripts.ts'), path.join(rootDir, './src/**/*.ts')],
         },
     },
     server: {
@@ -97,5 +97,11 @@ main({
             return res.end('404');
         },
         port: 8080,
+    },
+    browsers: {
+        viewport: {
+            width: 1700,
+            height: 900,
+        },
     },
 });
