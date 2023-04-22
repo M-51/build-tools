@@ -29,7 +29,7 @@
     "@types/postcss-import": "^14.0.0",
     "esbuild": "^0.17.17",
     "eslint-config-m51": "^0.1.10",
-    "postcss": "^8.4.22",
+    "postcss": "^8.4.23",
     "postcss-import": "^15.1.0",
     "postcss-preset-env": "^8.3.2",
     "ts-node": "^10.9.1",

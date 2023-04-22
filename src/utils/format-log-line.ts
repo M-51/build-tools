@@ -39,9 +39,9 @@ function formatStatus(status: Status) {
 
 function formatLogLine(added: Parameters<Callback>[0], changed: Parameters<Callback>[1], status: Status) {
     const formatedFileList = formatFileList(added, changed);
-    const logger = log(`${formatedFileList} | ${formatStatus(status)}`);
+    const logger = log(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(status)}`);
     return (updates: Status, extra?: string) => {
-        logger(`${formatedFileList} | ${formatStatus(updates)}${extra || ''}`);
+        logger(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(updates)}${extra || ''}`);
     };
 }
 export default formatLogLine;

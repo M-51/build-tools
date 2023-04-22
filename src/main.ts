@@ -36,6 +36,7 @@ async function main(config: Config) {
             browsers: { type: 'string', short: 'b', multiple: true },
             server: { type: 'boolean', short: 's' },
             url: { type: 'string', short: 'u' },
+            watch: { type: 'boolean', short: 'w' },
         },
         strict: true,
     });
@@ -128,15 +129,21 @@ async function main(config: Config) {
         addPlaceholder();
     };
 
-    const debouncedRefresh = debounce(refresh);
-    const watchers = Object.entries(config.watchers).map(([name, value]) => {
-        const watcher = chokidar.watch(value.glob)
-            .on('change', (filePath) => { debouncedRefresh('changed', filePath, name); })
-            .on('add', (filePath) => { debouncedRefresh('added', filePath, name); });
-        return watcher;
-    });
+    const shutdownPromises: Array<() => Promise<void>> = [];
 
-    const shutdownPromises = [async () => { const logger = log('Closing watchers...'); await Promise.all(watchers.map((watcher) => watcher.close())); logger('Watchers closed in {time}ms'); }];
+    if (params.values.watch) {
+        const debouncedRefresh = debounce(refresh);
+        const watchers = Object.entries(config.watchers).map(([name, value]) => {
+            const watcher = chokidar.watch(value.glob)
+                .on('change', (filePath) => { debouncedRefresh('changed', filePath, name); })
+                .on('add', (filePath) => { debouncedRefresh('added', filePath, name); });
+            return watcher;
+        });
+        shutdownPromises.push(async () => { const logger = log('Closing watchers...'); await Promise.all(watchers.map((watcher) => watcher.close())); logger('Watchers closed in {time}ms'); });
+    } else {
+        await refresh([], [], Object.keys(config.watchers));
+        deletePlaceholder();
+    }
 
     if (closeServer) shutdownPromises.push(async () => { const logger = log('Closing server...'); await closeServer(); logger('Server closed in {time}ms'); });
 
