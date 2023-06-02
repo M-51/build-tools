@@ -30,7 +30,7 @@ interface Config {
     }
 }
 
-async function main(config: Config) {
+async function dev(config: Config) {
     const params = parseArgs({
         options: {
             browsers: { type: 'string', short: 'b', multiple: true },
@@ -46,8 +46,8 @@ async function main(config: Config) {
     const closeServer = await (async () => {
         if (params.values.server && config.server?.listener) {
             const bar = progressBar(1);
-            const logger = log(`${bar()} Starting server...`);
-            const server = http.createServer(config.server.listener).listen(port, () => logger(`${bar(1)} Server started in {time}ms. Listening on \x1b[35mhttp://localhost:${port}\x1b[0m`));
+            const logger = log(`${bar()} | Starting server...`);
+            const server = http.createServer(config.server.listener).listen(port, () => logger(`${bar(1)} | Server started in {time}ms. Listening on \x1b[35mhttp://localhost:${port}\x1b[0m`));
             return () => new Promise((resolve, reject) => {
                 server.close((err) => {
                     if (err) return reject(err);
@@ -63,21 +63,21 @@ async function main(config: Config) {
         const browsersToStart = availableBrowsers.filter((browser) => params.values.browsers?.includes(browser));
         const data = await Promise.all(browsersToStart.map(async (browserName) => {
             const bar = progressBar(4);
-            const logger = log(`${bar()} ${capitalize(browserName)} => Starting browser...`);
+            const logger = log(`${bar()} | ${capitalize(browserName)} => Starting browser...`);
             let state = 'Creating browser context...';
             try {
                 const browser = await playwright[browserName].launch({ headless: false, handleSIGINT: false, devtools: true });
-                logger(`${bar(1)} ${capitalize(browserName)} => ${state}`);
+                logger(`${bar(1)} | ${capitalize(browserName)} => ${state}`);
                 const context = await browser.newContext({ viewport: config.browsers?.viewport || { width: 1500, height: 900 } });
                 state = 'Opening new page...';
-                logger(`${bar(2)} ${capitalize(browserName)} => ${state}`);
+                logger(`${bar(2)} | ${capitalize(browserName)} => ${state}`);
                 const page = await browser.contexts()[0].newPage();
                 const url = params.values.url || `http://localhost${params.values.server && config.server?.listener ? `:${port}` : ''}`;
                 state = `Navigating to ${url}...`;
-                logger(`${bar(3)} ${capitalize(browserName)} => ${state}`);
+                logger(`${bar(3)} | ${capitalize(browserName)} => ${state}`);
                 await page.goto(url);
                 state = 'Ready';
-                logger(`${bar(4)} ${capitalize(browserName)} => \x1b[32m${state} ✓\x1b[0m`);
+                logger(`${bar(4)} | ${capitalize(browserName)} => \x1b[32m${state} ✓\x1b[0m`);
                 return { page, browser, context };
             } catch (err) {
                 logger(`${bar(undefined, true)} ${capitalize(browserName)} => ${state} | \x1b[31mFailed to launch browser ✖\x1b[0m`);
@@ -161,4 +161,4 @@ async function main(config: Config) {
     process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise()))));
 }
 
-export default main;
+export default dev;

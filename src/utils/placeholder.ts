@@ -1,8 +1,8 @@
 function placeholder(msg: string) {
     let isActive = false;
     return {
-        addPlaceholder: () => {
-            if (process.stdout.isTTY) process.stdout.write(`${msg}\n`);
+        addPlaceholder: (newMsg?: string) => {
+            if (process.stdout.isTTY) process.stdout.write(`${newMsg || msg}\n`);
             isActive = true;
         },
         deletePlaceholder: () => {

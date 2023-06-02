@@ -1,13 +1,16 @@
 {
-    "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts", "playwright.config.ts"],
+    "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
     "compilerOptions": {
         "noImplicitAny": true,
         "target": "ES2022",
         "declaration": true,
         "moduleResolution": "node",
-        "module": "ES2022",
+        "module": "ESNext",
         "resolveJsonModule": true,
         "outDir": "dist",
-        "allowSyntheticDefaultImports": true
+        "esModuleInterop": true,
     },
+    "ts-node": {
+        "esm": true
+    }
 }

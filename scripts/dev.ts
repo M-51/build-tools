@@ -6,7 +6,7 @@ import postcss from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 import atImport from 'postcss-import';
 
-import { main } from '../src/index.js';
+import { dev } from '../src/index.js';
 
 const rootDir = path.join(new URL(import.meta.url).pathname, '../../');
 
@@ -18,7 +18,7 @@ const paths = {
 
 const cache: Map<string, string> = new Map();
 
-main({
+dev({
     watchers: {
         CSS: {
             compile: async () => {

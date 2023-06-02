@@ -1,4 +1,5 @@
-import main from './main.js';
+import fs from 'fs-extra';
+import dev from './dev.js';
+import build from './build.js';
 
-// eslint-disable-next-line import/prefer-default-export
-export { main };
+export { dev, build, fs };
