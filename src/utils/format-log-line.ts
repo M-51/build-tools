@@ -1,5 +1,5 @@
 import type { Callback, Added, Changed } from './debounce.js';
-import log from './logger.js';
+import { log } from './logger.js';
 
 type Status = Map<string, { status: 'compiled' | 'compiling' | 'error', finishTime?: number, startTime: number }>;
 
@@ -44,5 +44,6 @@ function formatLogLine(added: Parameters<Callback>[0], changed: Parameters<Callb
         logger(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(updates)}${extra || ''}`);
     };
 }
-export default formatLogLine;
+
+export { formatLogLine };
 export type { Status };

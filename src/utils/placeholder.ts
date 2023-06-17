@@ -16,4 +16,4 @@ function placeholder(msg: string) {
     };
 }
 
-export default placeholder;
+export { placeholder };

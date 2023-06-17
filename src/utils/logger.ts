@@ -24,4 +24,4 @@ function log(message: string) {
     };
 }
 
-export default log;
+export { log };

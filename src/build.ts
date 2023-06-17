@@ -1,6 +1,6 @@
-import log from './utils/logger.js';
-import placeholder from './utils/placeholder.js';
-import progressBar from './utils/progressbar.js';
+import { log } from './utils/logger.js';
+import { placeholder } from './utils/placeholder.js';
+import { progressBar } from './utils/progressbar.js';
 
 type Results = Map<string, unknown>;
 type Task = { name: string, task: (results: Results) => Promise<unknown> };
@@ -45,4 +45,4 @@ async function build(tasks: Tasks) {
     taskPlaceholder.addPlaceholder(`${bar(finished)} | \x1b[32mAll tasks finished successfuly in ${Math.round((Date.now() - now) / 10) / 100}s ✓\x1b[0m`);
 }
 
-export default build;
+export { build };

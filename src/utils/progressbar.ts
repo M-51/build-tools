@@ -10,4 +10,4 @@ function progressBar(total: number, length = 20) {
     };
 }
 
-export default progressBar;
+export { progressBar };

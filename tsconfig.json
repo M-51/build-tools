@@ -4,13 +4,10 @@
         "noImplicitAny": true,
         "target": "ES2022",
         "declaration": true,
-        "moduleResolution": "node",
-        "module": "ESNext",
+        "moduleResolution": "nodenext",
+        "module": "ES2022",
         "resolveJsonModule": true,
         "outDir": "dist",
-        "esModuleInterop": true,
+        "esModuleInterop": true
     },
-    "ts-node": {
-        "esm": true
-    }
 }

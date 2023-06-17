@@ -23,5 +23,5 @@ function debounce(callback: Callback, time = 50) {
     };
 }
 
-export default debounce;
-export { Callback, Added, Changed };
+export { debounce };
+export type { Callback, Added, Changed };

@@ -2,13 +2,13 @@ import chokidar from 'chokidar';
 import http from 'http';
 import { parseArgs } from 'node:util';
 import playwright from 'playwright';
-import debounce from './utils/debounce.js';
-import log from './utils/logger.js';
-import capitalize from './utils/captilalize.js';
+import { debounce } from './utils/debounce.js';
+import { log } from './utils/logger.js';
+import { capitalize } from './utils/captilalize.js';
 import type { Callback } from './utils/debounce.js';
-import progressBar from './utils/progressbar.js';
-import placeholder from './utils/placeholder.js';
-import formatLogLine from './utils/format-log-line.js';
+import { progressBar } from './utils/progressbar.js';
+import { placeholder } from './utils/placeholder.js';
+import { formatLogLine } from './utils/format-log-line.js';
 import type { Status } from './utils/format-log-line.js';
 
 interface Config {
@@ -161,4 +161,4 @@ async function dev(config: Config) {
     process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise()))));
 }
 
-export default dev;
+export { dev };
