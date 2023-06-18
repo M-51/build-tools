@@ -1,13 +1,14 @@
 {
   "name": "m51-build-tools",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --project tsconfig.production.json",
     "startDev": "tsx ./scripts/dev.ts -s -w -b chromium",
-    "startBuild": "tsx ./scripts/build.ts"
+    "startBuild": "tsx ./scripts/build.ts",
+    "a": "tsx scripts/a.ts"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "dependencies": {
     "chokidar": "^3.5.3",
     "fs-extra": "^11.1.1",
+    "globby": "^13.1.4",
     "playwright": "^1.35.1"
   },
   "devDependencies": {
