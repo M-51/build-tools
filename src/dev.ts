@@ -41,7 +41,7 @@ async function dev(config: Config) {
         strict: true,
     });
     const { addPlaceholder, deletePlaceholder } = placeholder('Waiting for change...');
-    const port = config.server.port || 8080;
+    const port = config.server?.port || 8080;
 
     const closeServer = await (async () => {
         if (params.values.server && config.server?.listener) {
