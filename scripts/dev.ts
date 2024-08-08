@@ -2,9 +2,7 @@
 import esbuild from 'esbuild';
 import path from 'path';
 import { readFile } from 'node:fs/promises';
-import postcss from 'postcss';
-import postcssPresetEnv from 'postcss-preset-env';
-import atImport from 'postcss-import';
+import { bundleAsync } from 'lightningcss';
 
 import { dev } from '../src/index.js';
 
@@ -22,9 +20,14 @@ dev({
     watchers: {
         CSS: {
             compile: async () => {
-                const input = await readFile(paths.cssFile, 'utf-8');
-                const { css } = await postcss([atImport(), postcssPresetEnv({ stage: 1 })])
-                    .process(input, { from: paths.cssFile, map: { inline: true } });
+                const { code } = await bundleAsync({
+                    filename: paths.cssFile,
+                    minify: true,
+                    drafts: {
+                        customMedia: true,
+                    },
+                });
+                const css = String(code);
                 cache.set('css', css);
                 return css;
             },
