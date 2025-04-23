@@ -38,7 +38,7 @@ async function dev(config: Config) {
             url: { type: 'string', short: 'u' },
             watch: { type: 'boolean', short: 'w' },
         },
-        strict: true,
+        strict: false,
     });
     const { addPlaceholder, deletePlaceholder } = placeholder('Waiting for change...');
     const port = config.server?.port || 8080;
