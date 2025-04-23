@@ -72,7 +72,7 @@ async function dev(config: Config) {
                 state = 'Opening new page...';
                 logger(`${bar(2)} | ${capitalize(browserName)} => ${state}`);
                 const page = await browser.contexts()[0].newPage();
-                const url = params.values.url || `http://localhost${params.values.server && config.server?.listener ? `:${port}` : ''}`;
+                const url = typeof params.values.url === 'string' ? params.values.url : `http://localhost${params.values.server && config.server?.listener ? `:${port}` : ''}`;
                 state = `Navigating to ${url}...`;
                 logger(`${bar(3)} | ${capitalize(browserName)} => ${state}`);
                 await page.goto(url);
