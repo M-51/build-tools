@@ -158,7 +158,9 @@ async function dev(config: Config) {
         });
     }
 
-    process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise()))));
+    process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise())).then(() => {
+        process.exit(0);
+    })));
 }
 
 export { dev };
