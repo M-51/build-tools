@@ -1,6 +1,6 @@
 {
   "name": "m51-build-tools",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,18 +20,19 @@
     "url": "https://github.com/M-51/build-tools/issues"
   },
   "homepage": "https://github.com/M-51/build-tools#readme",
-  "dependencies": {
-    "chokidar": "^3.6.0",
-    "fs-extra": "^11.2.0",
-    "playwright": "^1.46.0"
-  },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.1.0",
-    "esbuild": "^0.23.0",
+    "@types/node": "^24.2.0",
+    "esbuild": "^0.25.8",
     "eslint-config-m51": "^0.2.3",
-    "lightningcss": "^1.26.0",
-    "tsx": "^4.16.5",
-    "typescript": "^5.5.4"
+    "lightingcss": "^0.1.0",
+    "lightningcss": "^1.30.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.1",
+    "playwright": "^1.54.2"
   }
 }
