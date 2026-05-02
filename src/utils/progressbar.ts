@@ -1,6 +1,6 @@
 function progressBar(total: number, length = 20) {
     let currentStep: number = 0;
-    return (step?: number, err: boolean = false) => {
+    return (step?: number, err: boolean = false) : string => {
         if (step !== undefined) currentStep = step;
         const clampedStep = Math.min(Math.max(currentStep, 0), total);
         const percentage = Math.ceil((clampedStep * 100) / total);

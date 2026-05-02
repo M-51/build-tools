@@ -1,7 +1,7 @@
-import { build } from '../src/index.js';
+import { build } from '../src/index.ts';
 
-function sleep(time: number) {
-    return new Promise((resolve) => {
+async function sleep(time: number) : Promise<void> {
+    await new Promise((resolve) => {
         setTimeout(resolve, time);
     });
 }
@@ -15,4 +15,6 @@ build([
     { name: 'fourth task', task: async () => { await sleep(1000); } },
     { name: 'fourth task', task: async () => { await sleep(1000); } },
     { name: 'fifth task', task: async () => { await sleep(1000); } },
-]);
+]).catch((error: unknown) => {
+    console.error(error);
+});

@@ -1,13 +1,13 @@
 {
   "name": "m51-build-tools",
-  "version": "0.2.8",
+  "version": "0.4.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc --project tsconfig.production.json",
-    "startDev": "tsx ./scripts/dev.ts -s -w -b chromium",
-    "startBuild": "tsx ./scripts/build.ts"
+    "build": "rm -rf dist && tsc --project tsconfig.production.json && esbuild 'src/**/*.ts' --outdir=dist",
+    "startDev": "node ./scripts/dev.ts -s -w -b chromium",
+    "startBuild": "node ./scripts/build.ts"
   },
   "repository": {
     "type": "git",
@@ -21,18 +21,14 @@
   },
   "homepage": "https://github.com/M-51/build-tools#readme",
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^24.2.0",
-    "esbuild": "^0.25.8",
-    "eslint-config-m51": "^0.2.3",
-    "lightingcss": "^0.1.0",
-    "lightningcss": "^1.30.1",
-    "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "@types/node": "^25.6.0",
+    "esbuild": "^0.28.0",
+    "eslint-config-m51": "^0.6.0",
+    "lightningcss": "^1.32.0",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "chokidar": "^4.0.3",
-    "fs-extra": "^11.3.1",
-    "playwright": "^1.54.2"
+    "chokidar": "^5.0.0",
+    "playwright": "^1.59.1"
   }
 }

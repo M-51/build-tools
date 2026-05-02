@@ -1,5 +1,4 @@
-import fs from 'fs-extra';
-import { dev } from './dev.js';
-import { build } from './build.js';
+import { dev } from './dev.ts';
+import { build } from './build.ts';
 
-export { dev, build, fs };
+export { dev, build };

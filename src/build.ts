@@ -1,14 +1,19 @@
-import { log } from './utils/logger.js';
-import { placeholder } from './utils/placeholder.js';
-import { progressBar } from './utils/progressbar.js';
+import { log } from './utils/logger.ts';
+import { placeholder } from './utils/placeholder.ts';
+import { progressBar } from './utils/progressbar.ts';
 
 type Results = Map<string, unknown>;
-type Task = { name: string, task: (results: Results) => Promise<unknown> };
+interface Task { name: string, task: (results: Results) => Promise<unknown> }
 type Tasks = Array<Task | Array<Task>>;
 
 let finished = 0;
 
-async function runTask({ name, task }: Task, results: Results, taskPlaceholder: ReturnType<typeof placeholder>, bar: ReturnType<typeof progressBar>) {
+async function runTask(
+    { name, task }: Task,
+    results: Results,
+    taskPlaceholder: ReturnType<typeof placeholder>,
+    bar: ReturnType<typeof progressBar>,
+) : Promise<void> {
     const { addPlaceholder, deletePlaceholder } = taskPlaceholder;
     deletePlaceholder();
     const logger = log(`\x1b[30m${name} ⌛\x1b[0m`);
@@ -28,15 +33,15 @@ async function runTask({ name, task }: Task, results: Results, taskPlaceholder: 
     }
 }
 
-async function build(tasks: Tasks) {
+async function build(tasks: Tasks) : Promise<void> {
     finished = 0;
     const now = Date.now();
     const bar = progressBar(tasks.flat().length);
     const taskPlaceholder = placeholder(bar(finished));
-    const results = new Map();
+    const results: Results = new Map();
     for (const task of tasks) {
         if (Array.isArray(task)) {
-            await Promise.all(task.map((subTask) => runTask(subTask, results, taskPlaceholder, bar)));
+            await Promise.all(task.map(async (subTask) => { await runTask(subTask, results, taskPlaceholder, bar); }));
         } else {
             await runTask(task, results, taskPlaceholder, bar);
         }

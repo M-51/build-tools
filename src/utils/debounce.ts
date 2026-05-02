@@ -2,14 +2,14 @@ type Types = Array<string>;
 type Added = Array<string>;
 type Changed = Array<string>;
 
-type Callback = (added?: Added, changed?: Changed, types?: Types) => unknown;
+type Callback = (added: Added, changed: Changed, types: Types) => unknown;
 
 function debounce(callback: Callback, time = 50) {
     let interval: NodeJS.Timeout;
     const added: Added = [];
     const changed: Changed = [];
     const types: Types = [];
-    return (event: 'added' | 'changed', filePath: string, type: string) => {
+    return (event: 'added' | 'changed', filePath: string, type: string) : void => {
         if (type) types.push(type);
         clearTimeout(interval);
         if (event === 'added') added.push(filePath);

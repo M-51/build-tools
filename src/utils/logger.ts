@@ -19,7 +19,7 @@ function log(message: string) {
         };
     }
     console.log(`\x1b[36m${obj.dateString}\x1b[0m | ${message}\n`);
-    return (msg: string) => {
+    return (msg: string) : void => {
         console.log(`\x1b[36m${obj.dateString}\x1b[0m | ${msg.replaceAll('{time}', String(Date.now() - obj.now))}\n`);
     };
 }

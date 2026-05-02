@@ -2,56 +2,68 @@ import chokidar from 'chokidar';
 import http from 'http';
 import { parseArgs } from 'node:util';
 import playwright from 'playwright';
-import { debounce } from './utils/debounce.js';
-import { log } from './utils/logger.js';
-import { capitalize } from './utils/captilalize.js';
-import type { Callback } from './utils/debounce.js';
-import { progressBar } from './utils/progressbar.js';
-import { placeholder } from './utils/placeholder.js';
-import { formatLogLine } from './utils/format-log-line.js';
-import type { Status } from './utils/format-log-line.js';
+import { debounce } from './utils/debounce.ts';
+import { log } from './utils/logger.ts';
+import { capitalize } from './utils/captilalize.ts';
+import type { Callback } from './utils/debounce.ts';
+import { progressBar } from './utils/progressbar.ts';
+import { placeholder } from './utils/placeholder.ts';
+import { formatLogLine } from './utils/format-log-line.ts';
+import type { Status } from './utils/format-log-line.ts';
 
 interface Config {
     watchers: {
         [key: string]: {
             compile: () => Promise<unknown>,
             glob: string | Array<string>,
-        }
-    }
+        },
+    },
     server?: {
-        listener: http.RequestListener,
+        listener: ((req: http.IncomingMessage, res: http.ServerResponse) => void | Promise<void>),
         port?: number,
-    }
+    },
     browsers?: {
         viewport?: {
             width: number,
             height: number,
-        }
-    }
+        },
+    },
 }
 
-async function dev(config: Config) {
+async function dev(config: Config) : Promise<void> {
     const params = parseArgs({
         options: {
-            browsers: { type: 'string', short: 'b', multiple: true },
-            server: { type: 'boolean', short: 's' },
-            url: { type: 'string', short: 'u' },
-            watch: { type: 'boolean', short: 'w' },
+            browsers: { type: 'string', 'short': 'b', multiple: true },
+            server: { type: 'boolean', 'short': 's' },
+            url: { type: 'string', 'short': 'u' },
+            watch: { type: 'boolean', 'short': 'w' },
         },
         strict: false,
     });
     const { addPlaceholder, deletePlaceholder } = placeholder('Waiting for change...');
-    const port = config.server?.port || 8080;
+    const port = typeof config.server?.port === 'number' && Number.isInteger(config.server.port) ? config.server.port : 8080;
 
-    const closeServer = await (async () => {
-        if (params.values.server && config.server?.listener) {
+    const closeServer = (() => {
+        if (params.values.server === true && config.server?.listener) {
             const bar = progressBar(1);
             const logger = log(`${bar()} | Starting server...`);
-            const server = http.createServer(config.server.listener).listen(port, () => logger(`${bar(1)} | Server started in {time}ms. Listening on \x1b[35mhttp://localhost:${port}\x1b[0m`));
-            return () => new Promise((resolve, reject) => {
+            const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
+                const maybePromise = config.server?.listener(req, res);
+                if (maybePromise && 'catch' in maybePromise && typeof maybePromise.catch === 'function') {
+                    maybePromise.catch((error: unknown) => {
+                        console.log(error);
+                    });
+                }
+            }).listen(port, () => {
+                logger(`${bar(1)} | Server started in {time}ms. Listening on \x1b[35mhttp://localhost:${port}\x1b[0m`);
+            });
+            return async () => await new Promise((resolve, reject) => {
                 server.close((err) => {
-                    if (err) return reject(err);
-                    return resolve(true);
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(true);
                 });
             });
         }
@@ -60,25 +72,29 @@ async function dev(config: Config) {
 
     const browsers = await (async () => {
         const availableBrowsers: Array<'firefox' | 'chromium' | 'webkit'> = ['firefox', 'chromium', 'webkit'];
-        const browsersToStart = availableBrowsers.filter((browser) => params.values.browsers?.includes(browser));
+        const browsersToStart = availableBrowsers.filter((browser) => params.values.browsers?.includes(browser) === true);
         const data = await Promise.all(browsersToStart.map(async (browserName) => {
             const bar = progressBar(4);
             const logger = log(`${bar()} | ${capitalize(browserName)} => Starting browser...`);
             let state = 'Creating browser context...';
             try {
-                const browser = await playwright[browserName].launch({ headless: false, handleSIGINT: false, devtools: true });
+                const browser = await playwright[browserName].launch({ headless: false, handleSIGINT: false });
                 logger(`${bar(1)} | ${capitalize(browserName)} => ${state}`);
-                const context = await browser.newContext({ viewport: config.browsers?.viewport || { width: 1500, height: 900 } });
+                const context = await browser.newContext({ viewport: config.browsers?.viewport ?? { width: 1500, height: 900 } });
                 state = 'Opening new page...';
                 logger(`${bar(2)} | ${capitalize(browserName)} => ${state}`);
-                const page = await browser.contexts()[0].newPage();
-                const url = typeof params.values.url === 'string' ? params.values.url : `http://localhost${params.values.server && config.server?.listener ? `:${port}` : ''}`;
-                state = `Navigating to ${url}...`;
-                logger(`${bar(3)} | ${capitalize(browserName)} => ${state}`);
-                await page.goto(url);
-                state = 'Ready';
-                logger(`${bar(4)} | ${capitalize(browserName)} => \x1b[32m${state} ✓\x1b[0m`);
-                return { page, browser, context };
+                const contexts = browser.contexts();
+                if (contexts[0]) {
+                    const page = await contexts[0].newPage();
+                    const url = typeof params.values.url === 'string' ? params.values.url : `http://localhost${params.values.server === true && config.server?.listener ? `:${port}` : ''}`;
+                    state = `Navigating to ${url}...`;
+                    logger(`${bar(3)} | ${capitalize(browserName)} => ${state}`);
+                    await page.goto(url);
+                    state = 'Ready';
+                    logger(`${bar(4)} | ${capitalize(browserName)} => \x1b[32m${state} ✓\x1b[0m`);
+                    return { page, browser, context };
+                }
+                throw new Error('Cannot find context');
             } catch (err) {
                 logger(`${bar(undefined, true)} ${capitalize(browserName)} => ${state} | \x1b[31mFailed to launch browser ✖\x1b[0m`);
                 throw err;
@@ -95,19 +111,23 @@ async function dev(config: Config) {
         const updateLogLine = formatLogLine(added, changed, status);
 
         try {
-            await Promise.all(usedTypes.map((type) => (async () => {
-                const obj = status.get(type);
-                try {
-                    await config.watchers[type].compile();
-                    obj.status = 'compiled';
-                    obj.finishTime = Date.now();
-                    updateLogLine(status);
-                } catch (error) {
-                    obj.status = 'error';
-                    updateLogLine(status);
-                    throw error;
-                }
-            })()));
+            await Promise.all(usedTypes.map(async (type) => {
+                await (async () => {
+                    const obj = status.get(type);
+                    if (obj && config.watchers[type]) {
+                        try {
+                            await config.watchers[type].compile();
+                            obj.status = 'compiled';
+                            obj.finishTime = Date.now();
+                            updateLogLine(status);
+                        } catch (error) {
+                            obj.status = 'error';
+                            updateLogLine(status);
+                            throw error;
+                        }
+                    }
+                })();
+            }));
         } catch (error) {
             console.error(error);
             addPlaceholder();
@@ -131,7 +151,7 @@ async function dev(config: Config) {
 
     const shutdownPromises: Array<() => Promise<void>> = [];
 
-    if (params.values.watch) {
+    if (params.values.watch === true) {
         const debouncedRefresh = debounce(refresh);
         const watchers = Object.entries(config.watchers).map(([name, value]) => {
             const watcher = chokidar.watch(value.glob)
@@ -139,7 +159,11 @@ async function dev(config: Config) {
                 .on('add', (filePath) => { debouncedRefresh('added', filePath, name); });
             return watcher;
         });
-        shutdownPromises.push(async () => { const logger = log('Closing watchers...'); await Promise.all(watchers.map((watcher) => watcher.close())); logger('Watchers closed in {time}ms'); });
+        shutdownPromises.push(async () => {
+            const logger = log('Closing watchers...');
+            await Promise.all(watchers.map(async (watcher) => { await watcher.close(); }));
+            logger('Watchers closed in {time}ms');
+        });
     } else {
         await refresh([], [], Object.keys(config.watchers));
         deletePlaceholder();
@@ -158,7 +182,7 @@ async function dev(config: Config) {
         });
     }
 
-    process.on('SIGINT', debounce(() => Promise.all(shutdownPromises.map((promise) => promise())).then(() => {
+    process.on('SIGINT', debounce(async () => await Promise.all(shutdownPromises.map(async (promise) => { await promise(); })).then(() => {
         process.exit(0);
     })));
 }

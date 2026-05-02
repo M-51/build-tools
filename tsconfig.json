@@ -1,13 +1,22 @@
 {
-    "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"],
+    "include": ["src/**/*.ts", "scripts/**/*.ts"],
     "compilerOptions": {
-        "noImplicitAny": true,
-        "target": "ES2022",
+        "target": "esnext",
         "declaration": true,
-        "moduleResolution": "node",
-        "module": "ES2022",
+        "moduleResolution": "nodenext",
+        "module": "nodenext",
         "resolveJsonModule": true,
         "outDir": "dist",
-        "esModuleInterop": true
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "verbatimModuleSyntax": false,
+        "allowImportingTsExtensions": true,
+        "emitDeclarationOnly": true,
+        "noUncheckedIndexedAccess": true,
+        "types": ["node"],
+        "rootDir": "."
     },
 }

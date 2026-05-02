@@ -1,4 +1,0 @@
-{
-    "extends": ["eslint-config-m51"],
-    "root": true
-}

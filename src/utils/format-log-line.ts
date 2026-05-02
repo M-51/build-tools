@@ -1,9 +1,9 @@
-import type { Callback, Added, Changed } from './debounce.js';
-import { log } from './logger.js';
+import type { Callback, Added, Changed } from './debounce.ts';
+import { log } from './logger.ts';
 
 type Status = Map<string, { status: 'compiled' | 'compiling' | 'error', finishTime?: number, startTime: number }>;
 
-function formatListOfFilesMessage(arr: Added | Changed) {
+function formatListOfFilesMessage(arr: Added | Changed) : string {
     const message = `${arr.slice(0, 3).map((p) => {
         const chunks = p.split('/');
         const indexOfRoot = chunks.indexOf('src');
@@ -15,7 +15,7 @@ function formatListOfFilesMessage(arr: Added | Changed) {
     return message;
 }
 
-function formatFileList(added: Parameters<Callback>[0], changed: Parameters<Callback>[1]) {
+function formatFileList(added: Parameters<Callback>[0], changed: Parameters<Callback>[1]) : string {
     const formated = {
         added: formatListOfFilesMessage(added),
         changed: formatListOfFilesMessage(changed),
@@ -29,9 +29,9 @@ function formatFileList(added: Parameters<Callback>[0], changed: Parameters<Call
     return message;
 }
 
-function formatStatus(status: Status) {
+function formatStatus(status: Status) : string {
     return [...status].map(([key, value]) => {
-        if (value.status === 'compiled') return `\x1b[32m${key} ✓ - ${value.finishTime - value.startTime}ms\x1b[0m`;
+        if (value.status === 'compiled' && typeof value.finishTime === 'number') return `\x1b[32m${key} ✓ - ${value.finishTime - value.startTime}ms\x1b[0m`;
         if (value.status === 'error') return `\x1b[31m${key} ✖\x1b[0m`;
         return `\x1b[30m${key} ⌛\x1b[0m`;
     }).join(' | ');
@@ -40,8 +40,8 @@ function formatStatus(status: Status) {
 function formatLogLine(added: Parameters<Callback>[0], changed: Parameters<Callback>[1], status: Status) {
     const formatedFileList = formatFileList(added, changed);
     const logger = log(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(status)}`);
-    return (updates: Status, extra?: string) => {
-        logger(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(updates)}${extra || ''}`);
+    return (updates: Status, extra?: string) : void => {
+        logger(`${formatedFileList ? `${formatedFileList} | ` : ''}${formatStatus(updates)}${extra ?? ''}`);
     };
 }
 

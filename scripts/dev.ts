@@ -1,10 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/naming-convention */
 import esbuild from 'esbuild';
 import path from 'path';
 import { readFile } from 'node:fs/promises';
 import { bundleAsync } from 'lightningcss';
 
-import { dev } from '../src/index.js';
+import { dev } from '../src/index.ts';
 
 const rootDir = path.join(new URL(import.meta.url).pathname, '../../');
 
@@ -52,11 +52,14 @@ dev({
                     sourcemap: 'inline',
                     target: 'es2020',
                 });
+                if (typeof build.outputFiles[0]?.text !== 'string') {
+                    throw new Error('Cannot find output file');
+                }
                 const js = build.outputFiles[0].text;
                 cache.set('js', js);
                 return js;
             },
-            glob: [path.join(rootDir, './scripts/content/scripts.ts'), path.join(rootDir, './src/**/*.ts')],
+            glob: [path.join(rootDir, './scripts/content/scripts.ts'), path.join(rootDir, './src')],
         },
     },
     server: {
@@ -64,31 +67,35 @@ dev({
             if (req.url === '/') {
                 const file = cache.get('html');
                 res.writeHead(200, { 'Content-Type': 'text/html' });
-                return res.end(file);
+                res.end(file);
+                return;
             }
             if (req.url === '/style.css') {
                 const file = cache.get('css');
                 res.writeHead(200, { 'Content-Type': 'text/css' });
-                return res.end(file);
+                res.end(file);
+                return;
             }
             if (req.url === '/script.js') {
                 const file = cache.get('js');
                 res.writeHead(200, { 'Content-Type': 'application/javascript' });
-                return res.end(file);
+                res.end(file);
+                return;
             }
-            if (req.url?.startsWith('/audio/')) {
+            if (req.url?.startsWith('/audio/') === true) {
                 try {
                     const filename = req.url.split('/').at(-1);
                     const buffer = await readFile(path.join(rootDir, `./audio/${filename}`));
                     res.writeHead(200, { 'Content-Type': 'audio/x-matroska' });
-                    return res.end(buffer);
-                } catch (error) {
-                    if (error.code === 'ENOENT') return null;
+                    res.end(buffer);
+                    return;
+                } catch (error: unknown) {
+                    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return;
                     throw error;
                 }
             }
             res.writeHead(404, { 'Content-Type': 'text/plain' });
-            return res.end('404');
+            res.end('404');
         },
         port: 8080,
     },
@@ -98,4 +105,6 @@ dev({
             height: 900,
         },
     },
+}).catch((error: unknown) => {
+    throw error;
 });
