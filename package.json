@@ -1,11 +1,11 @@
 {
   "name": "m51-build-tools",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc --project tsconfig.production.json && esbuild 'src/**/*.ts' --outdir=dist",
+    "build": "rm -rf dist && tsc --project tsconfig.production.json",
     "startDev": "node ./scripts/dev.ts -s -w -b chromium",
     "startBuild": "node ./scripts/build.ts"
   },
